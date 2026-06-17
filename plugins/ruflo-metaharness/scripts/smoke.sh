@@ -191,6 +191,19 @@ grep -q "execCli(\[\s*'-y'\s*,\s*'metaharness@latest'" "$F" 2>/dev/null || \
 grep -q "cwd: opts" "$F" || miss="$miss no-cwd-passthrough"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
+step "17z31. roundtrip Stage 8 — drift-from-history end-to-end (iter 68)"
+miss=""
+F="$ROOT/scripts/test-pipeline-roundtrip.mjs"
+grep -q "Stage 8 — drift-from-history end-to-end" "$F" 2>/dev/null || miss="$miss no-stage-8"
+grep -q "drift-from-history --baseline-file → skippedAuditList === true" "$F" 2>/dev/null || miss="$miss no-iter66-assert"
+grep -q "drift-from-history --baseline-file → usedBaselineFile === true" "$F" 2>/dev/null || miss="$miss no-iter67-assert"
+grep -q "fastpath wall < 30s" "$F" 2>/dev/null || miss="$miss no-wall-budget"
+grep -q "drift-from-history self-match overall === 1" "$F" 2>/dev/null || miss="$miss no-self-match-assert"
+grep -q "alert NOT triggered at default threshold" "$F" 2>/dev/null || miss="$miss no-alert-not-fired"
+# Runtime: roundtrip passes (≥38 — iter 68 took it from 31, future iters keep climbing)
+node "$F" 2>&1 | grep -qE "(3[8-9]|[4-9][0-9]+) passed, 0 failed" || miss="$miss roundtrip-fewer-than-38"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
 step "17z30. drift-from-history --baseline-file fastest-path (iter 67)"
 miss=""
 F="$ROOT/scripts/drift-from-history.mjs"

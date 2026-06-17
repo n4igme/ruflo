@@ -304,6 +304,42 @@ try {
   assert(trend.delta?.findings?.clearedCount === 0,
     `self-roundtrip clearedCount === 0 (got ${trend.delta?.findings?.clearedCount})`);
 
+  // ──────────────────────────────────────────────────────────────
+  // STAGE 8 (iter 68) — drift-from-history end-to-end via --baseline-file
+  //
+  // Every prior stage tested audit-trend (the underlying primitive).
+  // None tested drift-from-history (the iter-53 user-facing wrapper).
+  // This stage runs the iter-67 fastest path: baseline from a file,
+  // skipping audit-list AND memory roundtrip entirely.
+  // ──────────────────────────────────────────────────────────────
+  console.log('\nStage 8 — drift-from-history end-to-end (iter 68)');
+  const driftFromHistoryRun = runNode('drift-from-history.mjs', [
+    '--baseline-file', basePath,
+    '--dry-run',
+    '--format', 'json',
+  ], 120_000);
+  const driftFromHistoryMatch = /\{[\s\S]*\}/.exec(driftFromHistoryRun.stdout);
+  assert(driftFromHistoryMatch !== null, 'drift-from-history produced JSON');
+  const dfh = JSON.parse(driftFromHistoryMatch[0]);
+
+  // Iter-66/iter-67 contract: the fastest-path flags are surfaced in timing
+  assert(dfh.timing?.skippedAuditList === true,
+    'drift-from-history --baseline-file → skippedAuditList === true (iter 66)');
+  assert(dfh.timing?.usedBaselineFile === true,
+    'drift-from-history --baseline-file → usedBaselineFile === true (iter 67)');
+  // Wall-clock fastpath proof: must be under 30s with file inputs
+  // (vs ~26s minimum for the audit-list-loading slow path)
+  assert(typeof dfh.timing?.parallelWallMs === 'number' && dfh.timing.parallelWallMs < 30000,
+    `drift-from-history fastpath wall < 30s (got ${dfh.timing?.parallelWallMs}ms)`);
+  // Same-file self-match → similarity 1.0
+  assert(dfh.drift?.structuralDistance?.overall === 1,
+    `drift-from-history self-match overall === 1 (got ${dfh.drift?.structuralDistance?.overall})`);
+  assert(dfh.drift?.structuralDistance?.verdict === 'near-identical',
+    `drift-from-history self-match verdict === near-identical (got ${dfh.drift?.structuralDistance?.verdict})`);
+  // Alert chain end-to-end
+  assert(dfh.alert?.triggered === false,
+    'drift-from-history self-match alert NOT triggered at default threshold (0.95)');
+
 } finally {
   try { rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
 }
