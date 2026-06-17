@@ -136,9 +136,15 @@ jobs:
         # 65 assertions across 7 tools. Slow path (~50s) due to npx
         # warmup; runs only on PRs that touched the MCP wiring.
         run: |
-          cd v3/@claude-flow/cli
-          npm install --no-audit --no-fund --ignore-scripts --silent
-          npm run build
+          # iter 117 — `npm install` in a single v3 workspace pkg fails with
+          # EUNSUPPORTEDPROTOCOL "workspace:*" because the workspace uses pnpm
+          # (v3/pnpm-workspace.yaml). Install at workspace root with pnpm, then
+          # cd into the pkg to build. pnpm@8.15.0 matches v3/package.json's
+          # packageManager pin (newer pnpm would emit a v9+ lockfile format).
+          cd v3
+          npx -y pnpm@8.15.0 install --frozen-lockfile --reporter=append-only
+          cd @claude-flow/cli
+          npx -y pnpm@8.15.0 run build
           cd ../../..
           node plugins/ruflo-metaharness/scripts/test-mcp-tools.mjs
 
@@ -186,9 +192,15 @@ jobs:
         # The eject command lives in v3/@claude-flow/cli/src/commands/.
         # CI doesn't have the bundled dist; build it here.
         run: |
-          cd v3/@claude-flow/cli
-          npm install --no-audit --no-fund --ignore-scripts --silent
-          npm run build
+          # iter 117 — `npm install` in a single v3 workspace pkg fails with
+          # EUNSUPPORTEDPROTOCOL "workspace:*" because the workspace uses pnpm
+          # (v3/pnpm-workspace.yaml). Install at workspace root with pnpm, then
+          # cd into the pkg to build. pnpm@8.15.0 matches v3/package.json's
+          # packageManager pin (newer pnpm would emit a v9+ lockfile format).
+          cd v3
+          npx -y pnpm@8.15.0 install --frozen-lockfile --reporter=append-only
+          cd @claude-flow/cli
+          npx -y pnpm@8.15.0 run build
 
       - name: eject dry-run produces a valid plan
         run: |
@@ -339,9 +351,15 @@ jobs:
 
       - name: Build CLI dist (for dispatcher round-trip)
         run: |
-          cd v3/@claude-flow/cli
-          npm install --no-audit --no-fund --ignore-scripts --silent
-          npm run build
+          # iter 117 — `npm install` in a single v3 workspace pkg fails with
+          # EUNSUPPORTEDPROTOCOL "workspace:*" because the workspace uses pnpm
+          # (v3/pnpm-workspace.yaml). Install at workspace root with pnpm, then
+          # cd into the pkg to build. pnpm@8.15.0 matches v3/package.json's
+          # packageManager pin (newer pnpm would emit a v9+ lockfile format).
+          cd v3
+          npx -y pnpm@8.15.0 install --frozen-lockfile --reporter=append-only
+          cd @claude-flow/cli
+          npx -y pnpm@8.15.0 run build
 
       - name: CLI dispatcher round-trip — `node bin/cli.js metaharness similarity` (iter 36)
         # Proves the iter-36 SUBCOMMANDS entry actually dispatches at the
@@ -426,9 +444,15 @@ jobs:
         # consumes internally.
         run: |
           set -e
-          cd v3/@claude-flow/cli
-          npm install --no-audit --no-fund --ignore-scripts --silent
-          npm run build
+          # iter 117 — `npm install` in a single v3 workspace pkg fails with
+          # EUNSUPPORTEDPROTOCOL "workspace:*" because the workspace uses pnpm
+          # (v3/pnpm-workspace.yaml). Install at workspace root with pnpm, then
+          # cd into the pkg to build. pnpm@8.15.0 matches v3/package.json's
+          # packageManager pin (newer pnpm would emit a v9+ lockfile format).
+          cd v3
+          npx -y pnpm@8.15.0 install --frozen-lockfile --reporter=append-only
+          cd @claude-flow/cli
+          npx -y pnpm@8.15.0 run build
           cd ../../../
           OUT=$(node v3/@claude-flow/cli/bin/cli.js metaharness score --path . --format json)
           echo "$OUT" | grep -q '"harnessFit"' || { echo "FAIL: score dispatcher dropped harnessFit"; exit 1; }
