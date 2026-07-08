@@ -1,6 +1,6 @@
 {
   "name": "ruflo",
-  "version": "3.25.2",
+  "version": "3.25.3",
   "description": "Ruflo - Enterprise AI agent orchestration platform. Deploy 60+ specialized agents in coordinated swarms with self-learning, fault-tolerant consensus, vector memory, and MCP integration",
   "main": "bin/ruflo.js",
   "type": "module",
@@ -42,13 +42,7 @@
   "dependencies": {
     "@claude-flow/cli": "^3.23.0"
   },
-  "optionalDependencies": {
-    "metaharness": "~0.2.8",
-    "@metaharness/router": "~0.3.2",
-    "@metaharness/kernel": "~0.1.2",
-    "@metaharness/darwin": "~0.8.0",
-    "@metaharness/redblue": "~0.1.4"
-  },
+  "optionalDependencies": {},
   "overrides": {
     "ruvector": "^0.2.27",
     "better-sqlite3": ">=12.8.0",
